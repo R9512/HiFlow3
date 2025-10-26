@@ -1,0 +1,20 @@
+[project]
+name = "hiflow3"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "eventlet>=0.40.3",
+    "flwr==1.20.0",
+    "ipfs-toolkit>=0.5.33",
+    "pandas>=2.3.2",
+    "python-gnupg>=0.5.5",
+    "python-socketio[client]>=5.13.0",
+    "scapy>=2.6.1",
+    "scikit-learn>=1.7.2",
+    "toml>=0.10.2",
+    "tomli>=2.2.1",
+    "tomli-w>=1.2.0",
+    "web3>=7.13.0",
+]

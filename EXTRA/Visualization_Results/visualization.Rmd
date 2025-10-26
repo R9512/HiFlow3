@@ -1,0 +1,302 @@
+```{r}
+options(scipen=999)
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP1_RESULT.csv")
+df$ACCURACY <- df$ACCURACY * 100
+
+# Filter for HiFlow3 only
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Plot
+p <- ggplot(df_hiflow, aes(x = ZETA, y = NUM_ZETA_MODELS,
+                            color = DATASET,
+                            shape = MODEL_TYPE,          # model shown as shape
+                            group = interaction(DATASET, MODEL_TYPE))) +  # no need to include implementation
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "No. Of Models Geneated Using BackUp Method vs MCI(Zeta) ",
+       x = "MCI(Zeta)",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model") +scale_y_continuous(breaks = seq(0, 10, by = 1)) +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("NUM_ZETA_MODEL_HIFLOW3.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+
+
+```
+```{r}
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP1_RESULT.csv")
+df$ACCURACY <- df$ACCURACY * 100
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+# Filter for HiFlow3 only
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Plot
+p <- ggplot(df_hiflow, aes(x = ZETA, y = ACCURACY,
+                            color = DATASET,
+                            shape = MODEL_TYPE,          # model shown as shape
+                            group = interaction(DATASET, MODEL_TYPE))) +  # no need to include implementation
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "Test Accuracy vs MCI(Zeta) ",
+       x = "MCI(Zeta)",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model") +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("EXP1_TEST_ACCURACY_HIFLOW3.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+
+
+```
+
+
+
+```{r}
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP1_RESULT.csv")
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+df$ACCURACY <- df$ACCURACY * 100
+
+# Filter for HiFlow3 only
+df_hiflow <- df %>% filter(IMPLIMENTATION == "Flower")
+
+# Plot
+p <- ggplot(df_hiflow, aes(x = ZETA, y = ACCURACY,
+                            color = DATASET,
+                            shape = MODEL_TYPE,          # model shown as shape
+                            group = interaction(DATASET, MODEL_TYPE))) +  # no need to include implementation
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "Test Accuracy vs MCI(Zeta) Flower ",
+       x = "MCI(Zeta)",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model") +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("EXP1_TEST_ACCURACY_Flower.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+
+```
+
+```{r}
+#Final
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Read CSV
+df <- read.csv("./EXP1_RESULT.csv")
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Pivot gas columns into long format for plotting
+df_long <- df_hiflow %>%
+  select(DATASET, MODEL_TYPE, ZETA, VALIDATOR_GAS, COORDINATOR_GAS) %>%
+  pivot_longer(cols = c("VALIDATOR_GAS", "COORDINATOR_GAS"),
+               names_to = "Component",
+               values_to = "Gas")
+df_long$Component <- recode(df_long$Component,
+                            "VALIDATOR_GAS" = "Validator Gas Usage",
+                            "COORDINATOR_GAS" = "Coordinator Gas Usage",
+                      )
+# Plot
+p = ggplot(df_long, aes(x = ZETA, y = Gas, color = DATASET, shape = MODEL_TYPE, linetype = Component)) +
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(title = "Gas Usage vs MCI(Zeta) ",
+       x = "MCI(Zeta)",
+       y = "Gas Usage in Wei",
+       color = "Dataset",
+       shape = "Model Type",
+       linetype = "Component")  +  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+ggsave("EXP1_GAS_USAGE.png", plot = p, width = 10, height = 6, dpi = 300)
+p
+
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Read CSV
+df <- read.csv("./EXP1_RESULT.csv")
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+df_hiflow$C_IPFS = df_hiflow$C_IPFS /1024
+df_hiflow$C_BLOCKCHAIN = df_hiflow$C_BLOCKCHAIN /1024
+df_hiflow$C_SYSTEM = df_hiflow$C_SYSTEM/1024
+# Pivot gas columns into long format for plotting
+df_long <- df_hiflow %>%
+  select(DATASET, MODEL_TYPE, ZETA, C_IPFS, C_BLOCKCHAIN, C_SYSTEM) %>%
+  pivot_longer(cols = c("C_IPFS", "C_BLOCKCHAIN", "C_SYSTEM"),
+               names_to = "Component",
+               values_to = "Gas")
+
+# Rename Component for nicer facet and legend labels
+df_long$Component <- recode(df_long$Component,
+                            "C_IPFS" = "IPFS Communication",
+                            "C_BLOCKCHAIN" = "Blockchain Communication",
+                            "C_SYSTEM" = "System Communication",
+                            )
+
+# Plot with solid lines
+p <- ggplot(df_long, aes(x = ZETA, y = Gas, color = DATASET, shape = MODEL_TYPE)) +
+  geom_point(size = 3) +
+  geom_line(size = 1, linetype = "solid") +  # all lines solid
+  labs(title = "Communication Overhead vs MCI(Zeta) ",
+       x = "MCI(Zeta)",
+       y = "No. of Kilo Bytes",
+       color = "Dataset",
+       shape = "Model Type") +
+  facet_wrap(~Component, scales = "free_y",ncol = 1) +  
+  theme(
+    
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("EXP1_Communication.png", plot = p,  dpi = 300)
+p
+
+```
+
+```{r}
+#EXP2
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP2_RESULT.csv",stringsAsFactors = FALSE)
+df <- df %>%
+  mutate(FLIP.PROP = sapply(FLIP.PROP, function(x) {
+    split_values <- strsplit(x, ",")[[1]]  # Split by comma
+    first_element_modified <- as.numeric(split_values[1]) * 3  # Multiply first element by 3
+    split_values[1] <- as.character(first_element_modified)  # Update first element
+    return(paste(split_values, collapse = ","))  # Recombine into string
+  }))
+df$ACCURACY <- df$ACCURACY * 100
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+
+# Filter for HiFlow3 only
+
+
+# Plot
+p <- ggplot(df, aes(x = FLIP.PROP, y = ACCURACY,
+                            color = DATASET,
+                            shape=MODEL_TYPE,       # model shown as shape
+                            #linetype=IMPLIMENTATION,
+                            group = interaction(DATASET, MODEL_TYPE,IMPLIMENTATION))) +  # no need to include implementation
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(title = "Data Poisoning - Test Accuracy vs Flip, Prop. (MCI = 2) ",
+       x = "Flip, Proportion",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model")+ #+scale_linetype_manual(values = c("Flower" = "dotted", "HiFlow3" = "solid")) 
+      facet_wrap(~ IMPLIMENTATION)+
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("EXP2_DATA_POISON.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+```
+
+```{r}
+#EXP2
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP3_RESULT.csv",stringsAsFactors = FALSE)
+df <- df %>%
+  mutate(FLIP.PROP = sapply(FLIP.PROP, function(x) {
+    split_values <- strsplit(x, ",")[[1]]  # Split by comma
+    first_element_modified <- as.numeric(split_values[1]) * 2  # Multiply first element by 3CAREFULL SJ
+    #CAREFULL SHOULD CHANGE THE ABOVE ONE TO 3
+    split_values[1] <- as.character(first_element_modified)  # Update first element
+    return(paste(split_values, collapse = ","))  # Recombine into string
+  }))
+df$ACCURACY <- df$ACCURACY * 100
+df$MODEL_TYPE[df$MODEL_TYPE == "SGD"]="SVM"
+
+# Filter for HiFlow3 only
+
+
+# Plot
+p <- ggplot(df, aes(x = FLIP.PROP, y = ACCURACY,
+                            color = DATASET,
+                            shape=MODEL_TYPE,       # model shown as shape
+                            #linetype=IMPLIMENTATION,
+                            group = interaction(DATASET, MODEL_TYPE,IMPLIMENTATION))) +  # no need to include implementation
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(title = "Model Poisoning - Test Accuracy vs Flip, Prop. (MCI = 2) ",
+       x = "Flip, Proportion",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model")+ #+scale_linetype_manual(values = c("Flower" = "dotted", "HiFlow3" = "solid")) 
+      facet_wrap(~ IMPLIMENTATION)+
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("EXP3_MODEL_POISON.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+```

@@ -1,0 +1,179 @@
+```{r}
+library(ggplot2)
+
+# Data
+df <- read.csv("./EXP1_RESULT.csv")
+
+# Scatter plot
+ggplot(df, aes(x = ACCURACY, y = ZETA, 
+               color = factor(ZETA), 
+               shape = IMPLIMENTATION)) +
+  geom_point(size = 4) +geom_line(size = 1) +
+  labs(title = "Test Accuracy vs Zeta",
+       x = "Zeta",
+       y = "Test Accuracy",
+       color = "Zeta",
+       shape = "Implementation") +
+  theme_minimal()
+```
+
+```{r}
+library(ggplot2)
+
+# Read data
+df <- read.csv("./EXP1_RESULT.csv")
+
+# Make sure ZETA is numeric
+df$ZETA <- as.numeric(df$ZETA)
+
+ggplot(df, aes(x = ZETA, y = ACCURACY,
+               color = IMPLIMENTATION,
+               shape = MODEL_TYPE,
+               group = interaction(DATASET, IMPLIMENTATION, MODEL_TYPE))) +
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "Test Accuracy vs Zeta",
+       x = "Zeta",
+       y = "Test Accuracy",
+       color = "Implementation",
+       shape = "Model") +
+  facet_wrap(~DATASET) +   # panel per dataset
+  theme_minimal()
+
+
+```
+```{r}
+#Final
+library(ggplot2)
+library(dplyr)
+
+df <- read.csv("./EXP1_RESULT.csv")
+df$ACCURACY <- df$ACCURACY * 100
+
+# Filter for HiFlow3 only
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Plot
+p <- ggplot(df_hiflow, aes(x = ZETA, y = ACCURACY,
+                            color = DATASET,
+                            shape = MODEL_TYPE,          # model shown as shape
+                            group = interaction(DATASET, MODEL_TYPE))) +  # no need to include implementation
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "Test Accuracy vs Zeta (HiFlow3)",
+       x = "Zeta",
+       y = "Test Accuracy (%)",
+       color = "Dataset",
+       shape = "Model") +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+
+# Save plot
+ggsave("TEST_ACCURACY_HIFLOW3.png", plot = p, width = 10, height = 6, dpi = 300)
+
+p
+
+
+```
+
+```{r}
+
+ggplot(df, aes(x = ZETA, y = C_IPFS,
+               color = DATASET,
+               shape = MODEL_TYPE,          # model shown as shape
+               linetype = IMPLIMENTATION,   # impl shown as line type
+               group = interaction(DATASET, IMPLIMENTATION, MODEL_TYPE))) +
+  geom_point(size = 4) +
+  geom_line(size = 1) +
+  labs(title = "Test Accuracy vs Zeta",
+       x = "Zeta",
+       y = "Test Accuracy",
+       color = "Dataset",
+       shape = "Model",
+       linetype = "Implementation") +
+  scale_linetype_manual(values = c("Flower" = "dotted", "HiFlow3" = "solid")) +
+  theme_minimal()
+
+```
+
+```{r}
+#Final
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Read CSV
+df <- read.csv("./EXP1_RESULT.csv")
+
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Pivot gas columns into long format for plotting
+df_long <- df_hiflow %>%
+  select(DATASET, MODEL_TYPE, ZETA, VALIDATOR_GAS, COORDINATOR_GAS) %>%
+  pivot_longer(cols = c("VALIDATOR_GAS", "COORDINATOR_GAS"),
+               names_to = "Component",
+               values_to = "Gas")
+
+# Plot
+p = ggplot(df_long, aes(x = ZETA, y = Gas, color = DATASET, shape = MODEL_TYPE, linetype = Component)) +
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(title = "Gas Usage vs Zeta (HiFlow3)",
+       x = "Zeta",
+       y = "Gas Usage",
+       color = "Dataset",
+       shape = "Model Type",
+       linetype = "Component") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+ggsave("GAS_USAGE.png", plot = p, width = 10, height = 6, dpi = 300)
+p
+
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Read CSV
+df <- read.csv("./EXP1_RESULT.csv")
+
+df_hiflow <- df %>% filter(IMPLIMENTATION == "HiFlow3")
+
+# Pivot gas columns into long format for plotting
+df_long <- df_hiflow %>%
+  select(DATASET, MODEL_TYPE, ZETA, C_IPFS, C_BLOCKCHAIN,C_COORDINATOR,C_VALIDATORS) %>%
+  pivot_longer(cols = c("C_IPFS", "C_BLOCKCHAIN","C_COORDINATOR","C_VALIDATORS"),
+               names_to = "Component",
+               values_to = "Gas")
+
+# Plot
+p =ggplot(df_long, aes(x = ZETA, y = Gas, color = DATASET, shape = MODEL_TYPE, linetype = Component)) +
+  geom_point(size = 3) +
+  geom_line(size = 1) +
+  labs(title = "Communication Overhead vs Zeta (HiFlow3)",
+       x = "Zeta",
+       y = "Bytes",
+       color = "Dataset",
+       shape = "Model Type",
+       linetype = "Component") +
+  facet_wrap(~Component, scales = "free_y")+ theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank(), 
+    panel.border = element_rect(color = "black", fill = NA)
+  )
+ggsave("Communication.png", plot = p, width = 10, height = 6, dpi = 300)
+p
+
+```
